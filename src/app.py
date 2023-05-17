@@ -144,8 +144,78 @@ def create_character():
 
 
 
+############################### DELETE #############################
+
+
+@app.route('/users/<int:users_id>', methods = ['DELETE'])
+def delete_user(users_id):
+    user = Users.query.get(users_id)
+    db.session.delete(user)
+    db.session.commit()
+
+    response_body = {"msg": "User deleted successfully"}
+    return jsonify({
+        "response": response_body,
+        "character": user.serialize()
+    }),200
+
+
+
+
+@app.route('/characters/<int:characters_id>', methods = ['DELETE'])
+def delete_character(characters_id):
+    character = Characters.query.get(characters_id)
+    db.session.delete(character)
+    db.session.commit()
+
+    response_body = {"msg": "Character deleted successfully"}
+    return jsonify({
+        "response": response_body,
+        "character": character.serialize()
+    }),200
+
+
+
+@app.route('/planets/<int:planets_id>', methods = ['DELETE'])
+def delete_planet(planets_id):
+    planet = Planets.query.get(planets_id)
+    db.session.delete(planet)
+    db.session.commit()
+
+    response_body = {"msg": "Planet deleted successfully"}
+    return jsonify({
+        "response": response_body,
+        "character": planet.serialize()
+    }),200
+
      
+
      # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=PORT, debug=False)
+
+
+
+    #   {
+    # "birth_year": "41.9BBY",
+    # "eye_color": "white",
+    # "gender": "male",
+    # "hair_color": "none",
+    # "heigth": 202.0,
+    # "id": 2,
+    # "mass": 136.0,
+    # "name": "Darth Vader"
+#   }
+
+
+# {
+#   "climate": "temperate",
+#   "diameter": 118000,
+#   "id": 4,
+#   "name": "Bespin",
+#   "orbital_period": 5110,
+#   "population": 6000000.0,
+#   "rotation_period": 12,
+#   "terrain": "gas giant"
+# }
