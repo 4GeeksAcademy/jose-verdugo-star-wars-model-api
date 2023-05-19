@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 
+
 db = SQLAlchemy()
 
 class Users(db.Model):
@@ -58,7 +59,7 @@ class Characters(db.Model):
     gender = db.Column(db.String(80), nullable=False)
 
     def __repr__(self):
-        return '<People %r>' % self.name
+        return '<Characters %r>' % self.name
     
     def serialize(self):
         return{
@@ -73,23 +74,26 @@ class Characters(db.Model):
         }
     
 
-class Favorites (db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    planet_id = db.Column(db.Integer, db.ForeignKey("planets.id"))
-    character_id = db.Column(db.Integer, db.ForeignKey("characters.id"))
+class FavoritePlanet (db.Model):
+    users_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, primary_key=True)
+    planets_id = db.Column(db.Integer, db.ForeignKey("planets.id"), nullable=False, primary_key=True)
 
-    planet = db.relationship('Planets')
-    user = db.relationship('Users')
-    character = db.relationship('Characters')
+    user = db.relationship('Users', backref = 'favorites_planet')
+    planet = db.relationship('Planets', backref = 'favorites_planet')
+    
 
     def __repr__(self):
-        return '<Favorites %r>' % self.id 
+        return f'<FavoritePlanet {self.user.username}, {self.planet.name}>' 
 
-    def serialize(self):
-        return{
-            "id": self.id,
-            "user.id": self.user_id,
-            "planet.id": self.planet_id,
-            "character_id": self.character_id
-        }
+class FavoriteCharacter (db.Model):
+    users_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, primary_key=True)
+    characters_id = db.Column(db.Integer, db.ForeignKey("characters.id"), nullable=False, primary_key=True)
+    
+
+    user = db.relationship('Users', backref = 'favorites_character')
+    character = db.relationship('Characters', backref = 'favorites_character')
+
+    def __repr__(self):
+        return f'<FavoriteCharacter {self.user.username}, {self.character.name}>'
+
+

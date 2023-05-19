@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, Users, Planets, Characters, Favorites
+from models import db, Users, Planets, Characters, FavoriteCharacter, FavoritePlanet
 #from models import Person
 
 app = Flask(__name__)
@@ -63,7 +63,7 @@ def get_character():
     return jsonify(characters_list), 200
 
 
-@app.route('/favorite', methods=['GET'])
+@app.route('/favorites', methods=['GET'])
 def get_favorite():
     favorite = Favorites.query.all()
 
@@ -143,9 +143,7 @@ def create_character():
     }), 200
 
 
-
 ############################### DELETE #############################
-
 
 @app.route('/users/<int:users_id>', methods = ['DELETE'])
 def delete_user(users_id):
@@ -187,8 +185,71 @@ def delete_planet(planets_id):
         "response": response_body,
         "character": planet.serialize()
     }),200
+      
 
-     
+############################### FAVORITES #############################
+
+###### POST FAVORITE_PLANET ######
+
+@app.route('/favoriteplanet/users/<int:users_id>/planets/<int:planets_id>', methods=['POST'])
+def post_favorite_planet(users_id, planets_id):
+    favorite = FavoritePlanet(users_id = users_id, planets_id =planets_id)
+
+    db.session.add(favorite)
+    db.session.commit()
+
+    return jsonify({'msg': 'Favorite inserted successfully'})
+
+###### POST FAVORITE_CHARACTER ######
+
+@app.route('/favoritecharacter/users/<int:users_id>/characters/<int:characters_id>', methods=['POST'])
+def post_favorite_character(users_id, characters_id):
+    favorite = FavoriteCharacter(users_id = users_id, characters_id =characters_id)
+
+    db.session.add(favorite)
+    db.session.commit()
+
+    return jsonify({'msg': 'Favorite inserted successfully'})
+
+###### DELETE FAVORITE_PLANET######
+
+@app.route('/favoriteplanet/users/<int:users_id>/planets/<int:planets_id>', methods=['DELETE'])
+def delete_favorite_planet(users_id, planets_id):
+    favorite = FavoritePlanet.query.filter_by(users_id=users_id, planets_id= planets_id).first()
+    
+    db.session.delete(favorite)
+    db.session.commit()
+    return jsonify({'msg': 'Favorite deleted successfully'}), 200
+
+###### DELETE FAVORITE_CHARACTER ######
+
+@app.route('/favoritecharacter/users/<int:users_id>/characters/<int:characters_id>', methods=['DELETE'])
+def delete_favorite_character(users_id, characters_id):
+    favorite = FavoriteCharacter.query.filter_by(users_id=users_id, characters_id= characters_id).first()
+    
+    db.session.delete(favorite)
+    db.session.commit()
+    return jsonify({'msg': 'Favorite deleted successfully'}), 200
+
+
+###### GET USERS_FAVORITES ######
+
+@app.route('/favorites/users/<int:users_id>', methods=['GET'])
+def get_favorite_items(users_id):
+    user = Users.query.get(users_id)
+    favorite_planets = user.favorites_planet
+    favorite_characters = user.favorites_character
+
+    planets = [favorite.planet for favorite in favorite_planets]
+    characters = [favorite.character for favorite in favorite_characters]
+
+    planet_names = [planet.name for planet in planets]
+    character_names = [character.name for character in characters]
+
+    return jsonify({'favorite_planets': planet_names, 'favorite_characters': character_names})
+
+
+
 
      # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
@@ -197,25 +258,3 @@ if __name__ == '__main__':
 
 
 
-    #   {
-    # "birth_year": "41.9BBY",
-    # "eye_color": "white",
-    # "gender": "male",
-    # "hair_color": "none",
-    # "heigth": 202.0,
-    # "id": 2,
-    # "mass": 136.0,
-    # "name": "Darth Vader"
-#   }
-
-
-# {
-#   "climate": "temperate",
-#   "diameter": 118000,
-#   "id": 4,
-#   "name": "Bespin",
-#   "orbital_period": 5110,
-#   "population": 6000000.0,
-#   "rotation_period": 12,
-#   "terrain": "gas giant"
-# }
